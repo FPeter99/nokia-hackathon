@@ -24,11 +24,10 @@ def main():
     for sor in data.splitlines()[2:]:
         resz = sor.split()
 
-        rendszam = resz[0]
         erkezes = datetime.strptime(resz[1] + " " + resz[2], "%Y-%m-%d %H:%M:%S")
         tavozas = datetime.strptime(resz[3] + " " + resz[4], "%Y-%m-%d %H:%M:%S")
 
-        print(parkoloOra(tavozas - erkezes))
+        print(f"{resz[0]}: {parkoloOra(tavozas - erkezes)}")
 
 
 if __name__ == "__main__":
