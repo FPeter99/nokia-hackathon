@@ -1,38 +1,35 @@
 from pathlib import Path
+from datetime import datetime, timedelta
+import math
 
-## jegyzet:
-## https://1drv.ms/o/c/480e2e0e80cfc5ea/IgA4bsiHLfKbTbkQss2gFZI6AdVfVKziCJIUlc40HisytnI
+def parkoloOra(idotartam) -> int:
 
-def F(Z, H) -> int:
-    ## Z -> eszköz db, H -> magasság
-    if Z == 1:
-        return H ## -> lépés = magasság
+    if(idotartam <= timedelta(minutes=30)):
+        return 0
     
-    ossz = 0
-    # F{Z}(H) = F{Z-1}(1) + ... + F{Z-1}(H-1) + F{Z-1}(H) 
-    #                 i=1                i=2          i=n
-    for i in range(1, H + 1):
-        ossz += F(Z - 1, i)
-    return ossz
+    fizetendoIdoOraban = math.ceil((idotartam.total_seconds() - 1800) / 3600)
 
-def min_num_of_drops(Z, H) -> int:
-    n = 1
-    while F(Z, n) < H:
-        n += 1
-    return n
-    
+    if fizetendoIdoOraban <= 3:
+        return fizetendoIdoOraban * 300
+
+    if idotartam < timedelta(days=1):
+        return 3 * 300 + (fizetendoIdoOraban - 3) * 500
+    else: ## több mint 1 nap, ezért minden megkezdett óra + 500 forint mert régebb óta prakol mint 3 óra
+        return idotartam.days * 10000 + math.ceil(((idotartam.total_seconds() % 86400) - 1800) / 3600) * 500
+
+  
 def main():
-    
     data = Path("input.txt").read_text(encoding="utf-8")
+    print(data, end="")
 
-    for elem in data.splitlines():
-        
-        Z, H = elem.split(", ")
+    for sor in data.splitlines()[2:]:
+        resz = sor.split()
 
-        n = min_num_of_drops(int(Z), int(H))
+        rendszam = resz[0]
+        erkezes = datetime.strptime(resz[1] + " " + resz[2], "%Y-%m-%d %H:%M:%S")
+        tavozas = datetime.strptime(resz[3] + " " + resz[4], "%Y-%m-%d %H:%M:%S")
 
-        print(n)
-
+        print(f"parkoltás hossza {tavozas - erkezes}, fizetendő összeg: {parkoloOra(tavozas - erkezes)} forint")
 
 
 if __name__ == "__main__":
