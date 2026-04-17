@@ -20,7 +20,6 @@ def parkoloOra(idotartam) -> int:
   
 def main():
     data = Path("input.txt").read_text(encoding="utf-8")
-    print(data, end="")
 
     for sor in data.splitlines()[2:]:
         resz = sor.split()
@@ -29,7 +28,7 @@ def main():
         erkezes = datetime.strptime(resz[1] + " " + resz[2], "%Y-%m-%d %H:%M:%S")
         tavozas = datetime.strptime(resz[3] + " " + resz[4], "%Y-%m-%d %H:%M:%S")
 
-        print(f"parkoltás hossza {tavozas - erkezes}, fizetendő összeg: {parkoloOra(tavozas - erkezes)} forint")
+        print(parkoloOra(tavozas - erkezes))
 
 
 if __name__ == "__main__":
