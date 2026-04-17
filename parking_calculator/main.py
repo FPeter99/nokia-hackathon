@@ -31,7 +31,7 @@ def main():
 
         n = min_num_of_drops(int(Z), int(H))
 
-        print(f"{Z}, {H} -> {n}")
+        print(n)
 
 
 
