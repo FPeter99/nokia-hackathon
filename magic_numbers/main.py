@@ -15,14 +15,8 @@ def kilencesek(num) -> bool:
             return False
     return True
 
-
-def main():
-    
-    data = Path("input.txt").read_text(encoding="utf-8").splitlines()
-    ## data = [str, str, ...]
-    
-    for elem in data:
-        ## elem = "3^39"
+def next_magic_num(elem) -> str:
+    ## elem = "3^39"
 
         numInt = hatvanyKezeles(elem)
         ## numInt = 40525...
@@ -31,9 +25,8 @@ def main():
         ## numStr = "40525..."
 
         if kilencesek(numStr):
-            print(numInt + 2)
             ## 99 -> 101 vagy 9 -> 11
-            continue
+            return str(numInt + 2)
     
         if len(numStr) % 2 == 0:
             ## páros hossz
@@ -46,11 +39,11 @@ def main():
 
             if int(magicNumStr) > numInt:
                 ##megoldás
-                print(magicNumStr)
+                return magicNumStr
             else: 
                 elsoFelStr = str(int(elsoFelStr) + 1)
                 magicNumStr = elsoFelStr + elsoFelStr[::-1]
-                print(magicNumStr)
+                return magicNumStr
 
         else:
 
@@ -62,7 +55,7 @@ def main():
             magicNumStr = elejeStr + kozepsoStr + elejeStr[::-1]
 
             if int(magicNumStr) > numInt:
-                print(magicNumStr)
+                return magicNumStr
             else:
                 ##ha +1-el kibővítjük, minden esetben jót ad vissza
                 bovitettElejeStr = str(int(elejeStr + kozepsoStr) + 1)
@@ -72,8 +65,15 @@ def main():
 
                 magicNumStr = elejeStr + kozepsoStr + elejeStr[::-1]
 
-                print(magicNumStr)
+                return magicNumStr
 
+def main():
+    
+    data = Path("input.txt").read_text(encoding="utf-8").splitlines()
+    ## data = [str, str, ...]
+    
+    for elem in data:
+        print(next_magic_num(elem))
 
 if __name__ == "__main__":
     main()
