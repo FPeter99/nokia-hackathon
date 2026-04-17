@@ -1,19 +1,13 @@
 from pathlib import Path
 
-## jegyzet:
-## https://1drv.ms/o/c/480e2e0e80cfc5ea/IgA4bsiHLfKbTbkQss2gFZI6AdVfVKziCJIUlc40HisytnI
+def F(db, magassag) -> int:
 
-def F(Z, H) -> int:
-    ## Z -> eszköz db, H -> magasság
-    if Z == 1:
-        return H ## -> lépés = magasság
+    if db == 1:
+        return magassag ## lépés = magasság
+    if magassag == 0:
+        return 0
     
-    ossz = 0
-    # F{Z}(H) = F{Z-1}(1) + ... + F{Z-1}(H-1) + F{Z-1}(H) 
-    #                 i=1                i=2          i=n
-    for i in range(1, H + 1):
-        ossz += F(Z - 1, i)
-    return ossz
+    return F(db - 1, magassag - 1) + F(db, magassag - 1) + 1
 
 def min_num_of_drops(Z, H) -> int:
     n = 1
@@ -26,12 +20,15 @@ def main():
     data = Path("input.txt").read_text(encoding="utf-8")
 
     for elem in data.splitlines():
+
+        N, H = elem.split(", ")
+
+        x = 0
         
-        Z, H = elem.split(", ")
+        while F(int(N), int(x)) < int(H):
+            x += 1
 
-        n = min_num_of_drops(int(Z), int(H))
-
-        print(n)
+        print(x)
 
 
 
