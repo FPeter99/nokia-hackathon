@@ -27,7 +27,7 @@ def main():
         erkezes = datetime.strptime(resz[1] + " " + resz[2], "%Y-%m-%d %H:%M:%S")
         tavozas = datetime.strptime(resz[3] + " " + resz[4], "%Y-%m-%d %H:%M:%S")
 
-        print(f"{resz[0]} \t {parkoloOra(tavozas - erkezes)}")
+        print(f"{resz[0]} \t\t {parkoloOra(tavozas - erkezes)}")
 
 
 if __name__ == "__main__":

@@ -1,1 +1,0 @@
-return idotartam.days * 10000 + math.ceil(((idotartam.total_seconds() % 86400) - 1800) / 3600) * 500
