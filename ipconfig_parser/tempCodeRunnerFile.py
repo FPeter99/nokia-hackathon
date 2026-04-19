@@ -7,84 +7,76 @@ def kulcsFormazas(kulcs) -> str:
     return kulcs.replace(" ", "_")
 
 
+## 
 def ertekFormazas(v) -> str:
     return v.replace("\ufeff", "").strip().replace("(Preferred)", "").replace("(Deferred)", "").strip()
 
 
-def fileFormazas(sorok):
+def fileFormazas(lines):
     adapterek = []
-    aktualisAdapter = None
+    aktualis = None
     utolsoKulcs = None
 
-    for sor in sorok:
+    for sor in lines:
         sor = sor.strip()
         if not sor:
             continue
 
         # objektum kezdete
         if sor.lower().startswith("ethernet adapter") or sor.lower().startswith("wireless lan adapter"):
-            if aktualisAdapter:
-                ## itt adódik hozzá az adapterek-hez az aktualisAdapter
-                ## (az első lefuttatásnál üres az aktualisAdapter)
-                adapterek.append(aktualisAdapter)
+            if aktualis:
+                adapterek.append(aktualis)
 
-            ## adapter Inicializálása
-            aktualisAdapter = {
-                    "adapter_name": sor.split("adapter ", 1)[1].rstrip(":") if "adapter " in sor.lower() else "",
+            # Extract adapter name from the line (everything after "Adapter ")
+            adapter_name = sor.split("adapter ", 1)[1].rstrip(":") if "adapter " in sor.lower() else ""
+
+            ## kezdetben üres
+            aktualis = {
+                    "adapter_name": adapter_name,
                     "description": "",
                     "physical_address": "",
                     "dhcp_enabled": "",
                     "ipv4_address": "",
                     "subnet_mask": "",
-                    "default_gateway": [],
+                    "default_gateway": "",
                     "dns_servers": []
                 }
-            ## többsoros adatok miatt kell
             utolsoKulcs = None
             continue
 
-        if aktualisAdapter is None:
+        if aktualis is None:
             continue
 
-        # normál sor (nem többsoros adat)
+        # ha adatsor
         if ":" in sor:
             ## első ":"-nál spliteljük
             k, e = sor.split(":", 1)
             k = kulcsFormazas(k)
             e = ertekFormazas(e)
 
-            ## megjegyezzük hogy mi volt az előző, mert ha a következő többsoros adat akkor ehhez adjuk hozzá
             utolsoKulcs = k
 
-            ##kulcs érték hozzáadása az aktualis adapterhez
             if k in ("dns_servers", "default_gateway"):
-                ## ha van érték, hozzáteszi a listához, ha nincs, üres lesz
-                if e:
-                    aktualisAdapter[k] = [e]
-                else:
-                    aktualisAdapter[k] = []
+                aktualis[k] = [e] if e else []
             else:
-                aktualisAdapter[k] = e
+                aktualis[k] = e
 
         else:
             # többsoros érték
             if utolsoKulcs in ("dns_servers", "default_gateway"):
-                formazottErtek = ertekFormazas(sor)
-                if formazottErtek:
-                    ##hozzáadja a többsoros adatot a listához
-                    aktualisAdapter[utolsoKulcs].append(formazottErtek)
+                formatted_value = ertekFormazas(sor)
+                if formatted_value:
+                    aktualis[utolsoKulcs].append(formatted_value)
             elif utolsoKulcs:
-                ##stringként adja hozzá a többsoros adatot
-                aktualisAdapter[utolsoKulcs] = (aktualisAdapter[utolsoKulcs] + " " + ertekFormazas(sor)).strip()
+                aktualis[utolsoKulcs] = (aktualis[utolsoKulcs] + " " + ertekFormazas(sor)).strip()
 
-    if aktualisAdapter:
-        ## az menti az utolsó adaptert
-        adapterek.append(aktualisAdapter)
+    if aktualis:
+        adapterek.append(aktualis)
 
     return adapterek
 
 
-def szures(a):
+def egyszerusites(a):
     dg = a.get("default_gateway", [])
     dns = a.get("dns_servers", [])
     return {
@@ -94,28 +86,27 @@ def szures(a):
         "dhcp_enabled": a.get("dhcp_enabled", ""),
         "ipv4_address": a.get("ipv4_address", ""),
         "subnet_mask": a.get("subnet_mask", ""),
-        "default_gateway": dg if dg else [], ## ha üres akkor üres listát ad vissza
-        "dns_servers": dns if dns else []
+        "default_gateway": ", ".join(dg) if dg else "",
+        "dns_servers": ", ".join(dns) if dns else ""
     }
 
 
 def main():
-    output = []
+    out = []
 
-    ##végigmegy a .txt-ken
     for f in sorted(Path(".").glob("*.txt")):
         sorok = f.read_text(encoding="utf-16", errors="ignore").splitlines()
 
         adapters = fileFormazas(sorok)
 
-        output.append({
+        out.append({
             "file_name": f.name,
-            "adapters": [szures(a) for a in adapters]
+            "adapters": [egyszerusites(a) for a in adapters]
         })
 
     with open("output.json", "w", encoding="utf-8") as f:
-        json.dump(output, f, indent=2, ensure_ascii=False)
-    print(json.dumps(output, indent=2, ensure_ascii=False))
+        json.dump(out, f, indent=2, ensure_ascii=False)
+
 
 if __name__ == "__main__":
     main()
